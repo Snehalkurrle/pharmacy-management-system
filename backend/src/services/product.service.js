@@ -1,16 +1,17 @@
 const Product = require("../models/product.model");
 
-// Get All Products with Search, Category & Pagination
+// Get All Products with Search, Category, Sorting & Pagination
 const getAllProducts = async (
     search = "",
     category = "",
+    sort = "createdAt",
     page = 1,
     limit = 10
 ) => {
 
     const query = {};
 
-    // Search by Name
+    // Search
     if (search) {
         query.name = {
             $regex: search,
@@ -18,7 +19,7 @@ const getAllProducts = async (
         };
     }
 
-    // Filter by Category
+    // Category Filter
     if (category) {
         query.category = category;
     }
@@ -26,6 +27,7 @@ const getAllProducts = async (
     const skip = (page - 1) * limit;
 
     const products = await Product.find(query)
+        .sort(sort)
         .skip(skip)
         .limit(limit);
 
@@ -66,10 +68,24 @@ const deleteProduct = async (id) => {
     return await Product.findByIdAndDelete(id);
 };
 
+// Get Low Stock Products
+const getLowStockProducts = async () => {
+
+    return await Product.find({
+        quantity: {
+            $lte: 10
+        }
+    }).sort({
+        quantity: 1
+    });
+
+};
+
 module.exports = {
     getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getLowStockProducts
 };

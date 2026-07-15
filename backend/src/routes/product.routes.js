@@ -7,15 +7,24 @@ const authorizeRoles = require("../middleware/role.middleware");
 
 const {
     getAllProducts,
-    createProduct,
     getProductById,
+    createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getLowStockProducts
 } = require("../controllers/product.controller");
 
 // Everyone who is logged in can view products
 router.get("/", authMiddleware, getAllProducts);
 
+// Low Stock Products
+router.get(
+    "/low-stock",
+    authMiddleware,
+    getLowStockProducts
+);
+
+// Get Product By ID
 router.get("/:id", authMiddleware, getProductById);
 
 // Only Admin can create products

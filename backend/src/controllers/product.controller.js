@@ -8,6 +8,7 @@ const getAllProducts = async (req, res) => {
         const {
             search = "",
             category = "",
+            sort = "createdAt",
             page = 1,
             limit = 10
         } = req.query;
@@ -15,6 +16,7 @@ const getAllProducts = async (req, res) => {
         const result = await productService.getAllProducts(
             search,
             category,
+            sort,
             Number(page),
             Number(limit)
         );
@@ -156,10 +158,35 @@ const deleteProduct = async (req, res) => {
 
 };
 
+// Get Low Stock Products
+const getLowStockProducts = async (req, res) => {
+
+    try {
+
+        const products = await productService.getLowStockProducts();
+
+        res.status(200).json({
+            success: true,
+            count: products.length,
+            data: products
+        });
+
+    } catch (error) {
+
+        res.status(500).json({
+            success: false,
+            message: error.message
+        });
+
+    }
+
+};
+
 module.exports = {
     getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
-    deleteProduct
+    deleteProduct,
+    getLowStockProducts
 };
