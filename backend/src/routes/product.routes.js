@@ -5,16 +5,19 @@ const router = express.Router();
 const authMiddleware = require("../middleware/auth.middleware");
 const authorizeRoles = require("../middleware/role.middleware");
 
+const validateProduct = require("../validators/product.validator");
+
 const {
     getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
     deleteProduct,
-    getLowStockProducts
+    getLowStockProducts,
+    getExpiryAlertProducts
 } = require("../controllers/product.controller");
 
-// Everyone who is logged in can view products
+// Get All Products
 router.get("/", authMiddleware, getAllProducts);
 
 // Low Stock Products
@@ -24,26 +27,35 @@ router.get(
     getLowStockProducts
 );
 
+// Expiry Alert Products
+router.get(
+    "/expiry-alert",
+    authMiddleware,
+    getExpiryAlertProducts
+);
+
 // Get Product By ID
 router.get("/:id", authMiddleware, getProductById);
 
-// Only Admin can create products
+// Create Product (Admin Only)
 router.post(
     "/",
     authMiddleware,
     authorizeRoles("admin"),
+    validateProduct,
     createProduct
 );
 
-// Only Admin can update products
+// Update Product (Admin Only)
 router.put(
     "/:id",
     authMiddleware,
     authorizeRoles("admin"),
+    validateProduct,
     updateProduct
 );
 
-// Only Admin can delete products
+// Delete Product (Admin Only)
 router.delete(
     "/:id",
     authMiddleware,

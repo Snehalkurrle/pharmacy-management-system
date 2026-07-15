@@ -1,186 +1,150 @@
 const productService = require("../services/product.service");
+const asyncHandler = require("../utils/asyncHandler");
+const { sendSuccess, sendError } = require("../utils/response");
 
 // Get All Products
-const getAllProducts = async (req, res) => {
+const getAllProducts = asyncHandler(async (req, res) => {
 
-    try {
+    const {
+        search = "",
+        category = "",
+        sort = "createdAt",
+        page = 1,
+        limit = 10
+    } = req.query;
 
-        const {
-            search = "",
-            category = "",
-            sort = "createdAt",
-            page = 1,
-            limit = 10
-        } = req.query;
+    const result = await productService.getAllProducts(
+        search,
+        category,
+        sort,
+        Number(page),
+        Number(limit)
+    );
 
-        const result = await productService.getAllProducts(
-            search,
-            category,
-            sort,
-            Number(page),
-            Number(limit)
-        );
-
-        res.status(200).json({
-            success: true,
+    return sendSuccess(
+        res,
+        {
+            products: result.products,
             totalProducts: result.totalProducts,
             currentPage: result.currentPage,
-            totalPages: result.totalPages,
-            data: result.products
-        });
+            totalPages: result.totalPages
+        },
+        "Products fetched successfully"
+    );
 
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
-    }
-
-};
+});
 
 // Get Product By ID
-const getProductById = async (req, res) => {
+const getProductById = asyncHandler(async (req, res) => {
 
-    try {
+    const product = await productService.getProductById(req.params.id);
 
-        const product = await productService.getProductById(req.params.id);
-
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            data: product
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
+    if (!product) {
+        return sendError(
+            res,
+            404,
+            "Product not found"
+        );
     }
 
-};
+    return sendSuccess(
+        res,
+        product,
+        "Product fetched successfully"
+    );
+
+});
 
 // Create Product
-const createProduct = async (req, res) => {
+const createProduct = asyncHandler(async (req, res) => {
 
-    try {
+    const product = await productService.createProduct(req.body);
 
-        const product = await productService.createProduct(req.body);
+    return sendSuccess(
+        res,
+        product,
+        "Product created successfully",
+        201
+    );
 
-        res.status(201).json({
-            success: true,
-            message: "Product created successfully",
-            data: product
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
-    }
-
-};
+});
 
 // Update Product
-const updateProduct = async (req, res) => {
+const updateProduct = asyncHandler(async (req, res) => {
 
-    try {
+    const product = await productService.updateProduct(
+        req.params.id,
+        req.body
+    );
 
-        const product = await productService.updateProduct(
-            req.params.id,
-            req.body
+    if (!product) {
+        return sendError(
+            res,
+            404,
+            "Product not found"
         );
-
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Product updated successfully",
-            data: product
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
     }
 
-};
+    return sendSuccess(
+        res,
+        product,
+        "Product updated successfully"
+    );
+
+});
 
 // Delete Product
-const deleteProduct = async (req, res) => {
+const deleteProduct = asyncHandler(async (req, res) => {
 
-    try {
+    const product = await productService.deleteProduct(req.params.id);
 
-        const product = await productService.deleteProduct(req.params.id);
-
-        if (!product) {
-            return res.status(404).json({
-                success: false,
-                message: "Product not found"
-            });
-        }
-
-        res.status(200).json({
-            success: true,
-            message: "Product deleted successfully"
-        });
-
-    } catch (error) {
-
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
-
+    if (!product) {
+        return sendError(
+            res,
+            404,
+            "Product not found"
+        );
     }
 
-};
+    return sendSuccess(
+        res,
+        null,
+        "Product deleted successfully"
+    );
 
-// Get Low Stock Products
-const getLowStockProducts = async (req, res) => {
+});
 
-    try {
+// Low Stock Products
+const getLowStockProducts = asyncHandler(async (req, res) => {
 
-        const products = await productService.getLowStockProducts();
+    const products = await productService.getLowStockProducts();
 
-        res.status(200).json({
-            success: true,
+    return sendSuccess(
+        res,
+        {
             count: products.length,
-            data: products
-        });
+            products
+        },
+        "Low stock products fetched successfully"
+    );
 
-    } catch (error) {
+});
 
-        res.status(500).json({
-            success: false,
-            message: error.message
-        });
+// Expiry Alert Products
+const getExpiryAlertProducts = asyncHandler(async (req, res) => {
 
-    }
+    const products = await productService.getExpiryAlertProducts();
 
-};
+    return sendSuccess(
+        res,
+        {
+            count: products.length,
+            products
+        },
+        "Expiry alert products fetched successfully"
+    );
+
+});
 
 module.exports = {
     getAllProducts,
@@ -188,5 +152,6 @@ module.exports = {
     createProduct,
     updateProduct,
     deleteProduct,
-    getLowStockProducts
+    getLowStockProducts,
+    getExpiryAlertProducts
 };

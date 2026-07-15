@@ -11,7 +11,6 @@ const getAllProducts = async (
 
     const query = {};
 
-    // Search
     if (search) {
         query.name = {
             $regex: search,
@@ -19,7 +18,6 @@ const getAllProducts = async (
         };
     }
 
-    // Category Filter
     if (category) {
         query.category = category;
     }
@@ -68,7 +66,7 @@ const deleteProduct = async (id) => {
     return await Product.findByIdAndDelete(id);
 };
 
-// Get Low Stock Products
+// Low Stock Products
 const getLowStockProducts = async () => {
 
     return await Product.find({
@@ -81,11 +79,32 @@ const getLowStockProducts = async () => {
 
 };
 
+// Expiry Alert
+const getExpiryAlertProducts = async () => {
+
+    const today = new Date();
+
+    const next30Days = new Date();
+
+    next30Days.setDate(today.getDate() + 30);
+
+    return await Product.find({
+        expiryDate: {
+            $gte: today,
+            $lte: next30Days
+        }
+    }).sort({
+        expiryDate: 1
+    });
+
+};
+
 module.exports = {
     getAllProducts,
     getProductById,
     createProduct,
     updateProduct,
     deleteProduct,
-    getLowStockProducts
+    getLowStockProducts,
+    getExpiryAlertProducts
 };
