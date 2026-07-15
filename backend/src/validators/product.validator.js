@@ -1,6 +1,6 @@
-const { body, validationResult } = require("express-validator");
+const { body } = require("express-validator");
+const validate = require("../middleware/validation.middleware");
 
-// Validation Rules
 const validateProduct = [
 
     body("name")
@@ -34,25 +34,7 @@ const validateProduct = [
         .isISO8601()
         .withMessage("Expiry date must be a valid date."),
 
-    // Final Validation Middleware
-    (req, res, next) => {
-
-        const errors = validationResult(req);
-
-        if (!errors.isEmpty()) {
-
-            return res.status(400).json({
-                success: false,
-                message: "Validation failed.",
-                errors: errors.array()
-            });
-
-        }
-
-        next();
-
-    }
-
+    validate
 ];
 
 module.exports = validateProduct;

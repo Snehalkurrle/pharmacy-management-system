@@ -1,29 +1,27 @@
 const Sale = require("../models/sale.model");
 const Product = require("../models/product.model");
 
+const NotFoundError = require("../errors/NotFoundError");
+const BadRequestError = require("../errors/BadRequestError");
+
 // Create Sale
 const createSale = async (saleData) => {
 
-    // Find Product
     const product = await Product.findById(saleData.product);
 
     if (!product) {
-        throw new Error("Product not found.");
+        throw new NotFoundError("Product not found.");
     }
 
-    // Check Stock
     if (product.quantity < saleData.quantity) {
-        throw new Error("Insufficient stock available.");
+        throw new BadRequestError("Insufficient stock available.");
     }
 
-    // Calculate Total Amount
     saleData.totalAmount =
         saleData.quantity * saleData.sellingPrice;
 
-    // Save Sale
     const sale = await Sale.create(saleData);
 
-    // Reduce Product Stock
     await Product.findByIdAndUpdate(
         saleData.product,
         {
@@ -34,7 +32,6 @@ const createSale = async (saleData) => {
     );
 
     return sale;
-
 };
 
 // Get All Sales
@@ -51,8 +48,14 @@ const getAllSales = async () => {
 // Get Sale By ID
 const getSaleById = async (id) => {
 
-    return await Sale.findById(id)
+    const sale = await Sale.findById(id)
         .populate("product", "name manufacturer");
+
+    if (!sale) {
+        throw new NotFoundError("Sale not found.");
+    }
+
+    return sale;
 
 };
 

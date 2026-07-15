@@ -1,4 +1,5 @@
-const { body, validationResult } = require("express-validator");
+const { body } = require("express-validator");
+const validate = require("../middleware/validation.middleware");
 
 const validateSupplier = [
 
@@ -40,29 +41,7 @@ const validateSupplier = [
         .isIn(["Active", "Inactive"])
         .withMessage("Status must be either Active or Inactive."),
 
-    (req, res, next) => {
-
-        const errors = validationResult(req);
-
-        if (!errors.isEmpty()) {
-
-            const formattedErrors = errors.array().map(error => ({
-                field: error.path,
-                message: error.msg
-            }));
-
-            return res.status(400).json({
-                success: false,
-                message: "Validation failed.",
-                errors: formattedErrors
-            });
-
-        }
-
-        next();
-
-    }
-
+    validate
 ];
 
 module.exports = validateSupplier;

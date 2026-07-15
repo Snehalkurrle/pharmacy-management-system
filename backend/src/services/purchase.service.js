@@ -1,8 +1,25 @@
 const Purchase = require("../models/purchase.model");
 const Product = require("../models/product.model");
+const Supplier = require("../models/supplier.model");
+
+const NotFoundError = require("../errors/NotFoundError");
 
 // Create Purchase
 const createPurchase = async (purchaseData) => {
+
+    // Check Supplier
+    const supplier = await Supplier.findById(purchaseData.supplier);
+
+    if (!supplier) {
+        throw new NotFoundError("Supplier not found.");
+    }
+
+    // Check Product
+    const product = await Product.findById(purchaseData.product);
+
+    if (!product) {
+        throw new NotFoundError("Product not found.");
+    }
 
     // Calculate Total Amount
     purchaseData.totalAmount =
@@ -11,7 +28,7 @@ const createPurchase = async (purchaseData) => {
     // Save Purchase
     const purchase = await Purchase.create(purchaseData);
 
-    // Update Product Stock
+    // Increase Product Stock
     await Product.findByIdAndUpdate(
         purchaseData.product,
         {
@@ -22,7 +39,6 @@ const createPurchase = async (purchaseData) => {
     );
 
     return purchase;
-
 };
 
 // Get All Purchases
@@ -40,10 +56,15 @@ const getAllPurchases = async () => {
 // Get Purchase By ID
 const getPurchaseById = async (id) => {
 
-    return await Purchase.findById(id)
+    const purchase = await Purchase.findById(id)
         .populate("supplier", "name companyName")
         .populate("product", "name manufacturer");
 
+    if (!purchase) {
+        throw new NotFoundError("Purchase not found.");
+    }
+
+    return purchase;
 };
 
 module.exports = {
