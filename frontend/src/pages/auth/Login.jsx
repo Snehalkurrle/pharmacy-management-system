@@ -28,19 +28,22 @@ const Login = () => {
 
       console.log("API Response:", response);
 
-      // Save JWT Token
       localStorage.setItem("token", response.token);
 
       alert("Login Successful!");
-
-      // Redirect to dashboard later
-      // window.location.href = "/";
     } catch (error) {
-      console.error("Login Error:", error.response?.data);
+      console.log("FULL ERROR:", error);
 
-      alert(
-        error.response?.data?.message || "Login Failed"
-      );
+      if (error.response) {
+        console.log("Status:", error.response.status);
+        console.log("Data:", error.response.data);
+      } else if (error.request) {
+        console.log("No response received:", error.request);
+      } else {
+        console.log("Error Message:", error.message);
+      }
+
+      alert(error.response?.data?.message || error.message);
     } finally {
       setLoading(false);
     }
@@ -57,9 +60,7 @@ const Login = () => {
         </h1>
 
         <div className="mb-4">
-          <label className="block mb-2 font-medium">
-            Email
-          </label>
+          <label className="block mb-2 font-medium">Email</label>
 
           <input
             type="email"
@@ -73,9 +74,7 @@ const Login = () => {
         </div>
 
         <div className="mb-6">
-          <label className="block mb-2 font-medium">
-            Password
-          </label>
+          <label className="block mb-2 font-medium">Password</label>
 
           <input
             type="password"
@@ -91,7 +90,7 @@ const Login = () => {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-blue-700 text-white py-3 rounded hover:bg-blue-800 transition"
+          className="w-full bg-blue-700 text-white py-3 rounded hover:bg-blue-800"
         >
           {loading ? "Logging In..." : "Login"}
         </button>
